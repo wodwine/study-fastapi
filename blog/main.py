@@ -38,13 +38,11 @@ def get_all_blog(db: Session = Depends(get_db)):
 
 
 @app.get("/blog/{blog_id}", status_code=200)
-def get_blog_by_id(blog_id: int, response: Response, db: Session = Depends(get_db)):
+def get_blog_by_id(blog_id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
     if not blog:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Blog with the id: {blog_id} is not found")
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"detail": f"Blog with the id: {blog_id} is not found"}
     return blog
 
 
