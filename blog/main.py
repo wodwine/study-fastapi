@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, Response, HTTPException, status
 from . import schemas, models
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from typing import List
 
 app = FastAPI()
 
@@ -53,13 +54,13 @@ def update_blog(blog_id, request: schemas.Blog, db: Session = Depends(get_db)):
                         detail=f"Blog with the id: {blog_id} is not found")
 
 
-@app.get('/blog')
+@app.get('/blog',response_model=List[schemas.ShowBlog])
 def get_all_blog(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
 
-@app.get("/blog/{blog_id}", status_code=200)
+@app.get("/blog/{blog_id}", status_code=200,response_model=schemas.ShowBlog)
 def get_blog_by_id(blog_id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
     if not blog:
