@@ -26,7 +26,7 @@ def index():
 
 @app.post("/blog", status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create_blog(request: schemas.Blog, db: Session = Depends(get_db)):
-    new_blog = models.Blog(**request.dict())
+    new_blog = models.Blog(**request.dict(),user_id=1)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
@@ -70,7 +70,7 @@ def get_blog_by_id(blog_id: int, db: Session = Depends(get_db)):
     return blog
 
 
-@app.post("/user", response_model=schemas.ShowUser, tags=["users"])
+@app.post("/user", response_model=schemas.ShowUserWithBlog, tags=["users"])
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
     hashed_password = Hash.bcrypt(request.password)
     request = request.dict()
@@ -82,13 +82,13 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     return new_user
 
 
-@app.get("/user", response_model=List[schemas.ShowUser], tags=["users"])
+@app.get("/user", response_model=List[schemas.ShowUserWithBlog], tags=["users"])
 def get_all_user(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
 
-@app.get("/user/{user_id}", response_model=schemas.ShowUser, tags=["users"])
+@app.get("/user/{user_id}", response_model=schemas.ShowUserWithBlog, tags=["users"])
 def get_user_by_id(user_id, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
