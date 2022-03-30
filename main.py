@@ -1,7 +1,7 @@
 from typing import Optional
-
 from fastapi import FastAPI
 from blog import Blog
+import uvicorn
 
 app = FastAPI()
 
@@ -41,3 +41,7 @@ def comments(blog_id: int):
 @app.post("/blog")
 def create_blog(request: Blog):
     return {"data": f"Blog is created with title as: \"{request.title}\""}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=9000)
