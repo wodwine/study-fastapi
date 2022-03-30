@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from .. import schemas, database, models
 from ..hashing import Hash
 
-router = APIRouter()
+router = APIRouter(prefix="/user",tags=["Users"])
 
 get_db = database.get_db
 
 
-@router.post("/user", response_model=schemas.ShowUserWithBlog, tags=["users"])
+@router.post("/", response_model=schemas.ShowUserWithBlog)
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
     hashed_password = Hash.bcrypt(request.password)
     request = request.dict()
@@ -21,13 +21,13 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get("/user", response_model=List[schemas.ShowUserWithBlog], tags=["users"])
+@router.get("/", response_model=List[schemas.ShowUserWithBlog])
 def get_all_user(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
 
-@router.get("/user/{user_id}", response_model=schemas.ShowUserWithBlog, tags=["users"])
+@router.get("/{user_id}", response_model=schemas.ShowUserWithBlog)
 def get_user_by_id(user_id, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
