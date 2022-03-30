@@ -24,7 +24,7 @@ def index():
     return "Blog API"
 
 
-@app.post("/blog", status_code=status.HTTP_201_CREATED)
+@app.post("/blog", status_code=status.HTTP_201_CREATED, tags=["blogs"])
 def create_blog(request: schemas.Blog, db: Session = Depends(get_db)):
     new_blog = models.Blog(**request.dict())
     db.add(new_blog)
@@ -33,7 +33,7 @@ def create_blog(request: schemas.Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
-@app.delete("/blog/{blog_id}")
+@app.delete("/blog/{blog_id}", tags=["blogs"])
 def delete_blog(blog_id, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == blog_id)
     if blog.first():
@@ -44,7 +44,7 @@ def delete_blog(blog_id, db: Session = Depends(get_db)):
                         detail=f"Blog with the id: {blog_id} is not found")
 
 
-@app.put("/blog/{blog_id}")
+@app.put("/blog/{blog_id}", tags=["blogs"])
 def update_blog(blog_id, request: schemas.Blog, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == blog_id)
     if blog.first():
@@ -55,13 +55,13 @@ def update_blog(blog_id, request: schemas.Blog, db: Session = Depends(get_db)):
                         detail=f"Blog with the id: {blog_id} is not found")
 
 
-@app.get('/blog', response_model=List[schemas.ShowBlog])
+@app.get('/blog', response_model=List[schemas.ShowBlog], tags=["blogs"])
 def get_all_blog(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
     return blogs
 
 
-@app.get("/blog/{blog_id}", status_code=200, response_model=schemas.ShowBlog)
+@app.get("/blog/{blog_id}", status_code=200, response_model=schemas.ShowBlog, tags=["blogs"])
 def get_blog_by_id(blog_id: int, db: Session = Depends(get_db)):
     blog = db.query(models.Blog).filter(models.Blog.id == blog_id).first()
     if not blog:
@@ -70,7 +70,7 @@ def get_blog_by_id(blog_id: int, db: Session = Depends(get_db)):
     return blog
 
 
-@app.post("/user", response_model=schemas.ShowUser)
+@app.post("/user", response_model=schemas.ShowUser, tags=["users"])
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
     hashed_password = Hash.bcrypt(request.password)
     request = request.dict()
@@ -82,13 +82,13 @@ def create_user(request: schemas.User, db: Session = Depends(get_db)):
     return new_user
 
 
-@app.get("/user", response_model=List[schemas.ShowUser])
+@app.get("/user", response_model=List[schemas.ShowUser], tags=["users"])
 def get_all_user(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
 
-@app.get("/user/{user_id}", response_model=schemas.ShowUser)
+@app.get("/user/{user_id}", response_model=schemas.ShowUser, tags=["users"])
 def get_user_by_id(user_id, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
