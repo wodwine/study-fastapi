@@ -31,6 +31,28 @@ def create_blog(request: schemas.Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
+@app.delete("/blog/{blog_id}")
+def delete_blog(blog_id, db: Session = Depends(get_db)):
+    blog = db.query(models.Blog).filter(models.Blog.id == blog_id)
+    if blog.first():
+        blog.delete(synchronize_session=False)
+        db.commit()
+        return {"detail": f"Blog id: {blog_id} is deleted"}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Blog with the id: {blog_id} is not found")
+
+
+@app.put("/blog/{blog_id}")
+def update_blog(blog_id, request: schemas.Blog, db: Session = Depends(get_db)):
+    blog = db.query(models.Blog).filter(models.Blog.id == blog_id)
+    if blog.first():
+        blog.update(request.dict())
+        db.commit()
+        return {"detail": f"Blog id: {blog_id} is updated"}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Blog with the id: {blog_id} is not found")
+
+
 @app.get('/blog')
 def get_all_blog(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()
