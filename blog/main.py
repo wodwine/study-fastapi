@@ -4,6 +4,7 @@ from . import schemas, models
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
+from .hashing import Hash
 
 app = FastAPI()
 
@@ -69,13 +70,31 @@ def get_blog_by_id(blog_id: int, db: Session = Depends(get_db)):
     return blog
 
 
-@app.post("/user")
+@app.post("/user", response_model=schemas.ShowUser)
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
-    new_user = models.User(**request.dict())
+    hashed_password = Hash.bcrypt(request.password)
+    request = request.dict()
+    request["password"] = hashed_password
+    new_user = models.User(**request)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+@app.get("/user", response_model=List[schemas.ShowUser])
+def get_all_user(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return users
+
+
+@app.get("/user/{user_id}", response_model=schemas.ShowUser)
+def get_user_by_id(user_id, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"User with the id: {user_id} is not found")
+    return user
 
 
 if __name__ == "__main__":
